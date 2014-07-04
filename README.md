@@ -1,4 +1,11 @@
-forgery
+Forgery
 =======
 
-Forgery creates graphs of domain object with fake data
+Forgery fills graphs of domain objects with fake data
+
+Usage
+-----
+
+```java
+Address address = Forgery.forge(Address.class);
+```
