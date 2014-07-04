@@ -1,7 +1,7 @@
 package uk.co.adaptivelogic.forgery;
 
 public class Forgery {
-  public <T> static T forge(Class<T> type) {
+  public static <T> T forge(Class<T> type) {
     return type.newInstance();
   }
 }
