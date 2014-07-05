@@ -2,12 +2,8 @@ package uk.co.adaptivelogic.forgery;
 
 import org.junit.Rule;
 import org.junit.Test;
-<<<<<<< HEAD
 import uk.co.adaptivelogic.forgery.domain.Person;
-=======
 import org.junit.rules.ExpectedException;
-import uk.co.adaptivelogic.forgery.domain.Address;
->>>>>>> FETCH_HEAD
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -28,11 +24,7 @@ public class ForgeryTest {
     @Test
     public void shouldCreateBasicInstanceOfClass() {
         // When
-<<<<<<< HEAD
         Person person = Forgery.forge(Person.class);
-=======
-        Address address = forge(Address.class);
->>>>>>> FETCH_HEAD
 
         // Then
         assertThat(person, is(notNullValue()));

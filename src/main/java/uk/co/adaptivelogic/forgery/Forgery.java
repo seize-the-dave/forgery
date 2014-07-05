@@ -37,12 +37,11 @@ public class Forgery {
         choices.put(String.class, forgerMap);
     }
 
-    private <T> T forget(Class<T> type) {
+    private <T> T forgeFor(@Nonnull Class<T> type) {
         T generatedType;
 
-<<<<<<< HEAD
         try {
-            generatedType = type.newInstance();
+            generatedType = checkNotNull(type, MISSION_IMPOSSIBLE).newInstance();
             if (type.equals(String.class)) {
                 return generatedType;
             }
@@ -57,19 +56,8 @@ public class Forgery {
 
         return generatedType;
     } 
-=======
+    
     private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
-
-    public static <T> T forge(@Nonnull Class<T> type) {
-
-      T generatedType;
-
-      try {
-           generatedType = checkNotNull(type, MISSION_IMPOSSIBLE).newInstance();
-      } catch (Exception e) {
-          throw Throwables.propagate(e);
-      }
->>>>>>> FETCH_HEAD
 
     private <T> T forge(Class<T> type, String name) {
         T generatedType;
@@ -93,7 +81,7 @@ public class Forgery {
     }
 
     public static <T> T forge(Class<T> type) {
-        return new Forgery().forget(type);
+        return new Forgery().forgeFor(type);
     }
     
     private <T> Optional<ForgerMap<T>> getForger(Class<T> type) {
