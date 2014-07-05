@@ -7,5 +7,5 @@ Usage
 -----
 
 ```java
-Address address = Forgery.forge(Address.class);
+Address person = Forgery.forge(Address.class);
 ```
