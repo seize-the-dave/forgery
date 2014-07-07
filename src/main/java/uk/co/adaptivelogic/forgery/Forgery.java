@@ -5,8 +5,11 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,19 +28,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Forgery {    
     public static <T> T forge(@Nonnull Class<T> type) {
-        T generatedType;
+        T forgedType;
 
         try {
-            generatedType = checkNotNull(type, MISSION_IMPOSSIBLE).newInstance();
-            if (type.equals(String.class)) {
-                return generatedType;
-            }
+            forgedType = checkNotNull(type, MISSION_IMPOSSIBLE).newInstance();
+            forgeProperties(type, forgedType);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
 
-        return generatedType;
-    } 
-    
+        return forgedType;
+    }
+
+    private static <T> void forgeProperties(Class<T> type, T generatedType) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+        BeanInfo beanInfo = Introspector.getBeanInfo(type);
+        PropertyDescriptor[] properties = beanInfo.getPropertyDescriptors();
+        for (PropertyDescriptor property : properties) {
+            forgeProperty(generatedType, property);
+        }
+    }
+
+    private static <T> void forgeProperty(T type, PropertyDescriptor property) throws IllegalAccessException, InvocationTargetException {
+        Method write = property.getWriteMethod();
+        if (write != null) {
+            write.invoke(type, forge(property.getPropertyType()));
+        }
+    }
+
     private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
 }
