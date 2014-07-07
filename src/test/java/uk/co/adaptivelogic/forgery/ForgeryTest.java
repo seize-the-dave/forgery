@@ -1,5 +1,7 @@
 package uk.co.adaptivelogic.forgery;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.co.adaptivelogic.forgery.domain.Person;
@@ -11,7 +13,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
-import static uk.co.adaptivelogic.forgery.Forgery.forge;
 
 /**
  * Unit test to test and document the basic usage of {@link Forgery}
@@ -24,7 +25,7 @@ public class ForgeryTest {
     @Test
     public void shouldCreateInstanceOfClass() {
         // When
-        String string = forge(String.class);
+        String string = new Forgery().forge(String.class);
 
         // Then
         assertThat(string, is(notNullValue()));
@@ -33,12 +34,26 @@ public class ForgeryTest {
     @Test
     public void shouldCreateInstanceOfClassWithProperties() {
         // When
-        Person person = forge(Person.class);
+        Person person = new Forgery().forge(Person.class);
         
         // Then
         assertThat(person, is(notNullValue()));
         assertThat(person.getFirstName(), is(notNullValue()));
         assertThat(person.getLastName(), is(notNullValue()));
+    }
+    
+    @Test
+    public void shouldUseForgerForForgingClass() {
+        Forger<String> forger = new Forger<String>() {
+            public String forge() {
+                return "Example";
+            }
+        };
+        // When
+        String string = new Forgery(forger).forge(String.class);
+        
+        // Then
+        assertThat(string, is("Example"));
     }
     
     @Test
@@ -48,7 +63,7 @@ public class ForgeryTest {
         expectedException.expectMessage("Mission Impossible attempting to forge null classes :)");
 
         // When
-        forge(null);
+        new Forgery().forge(null);
     }
 
 }
