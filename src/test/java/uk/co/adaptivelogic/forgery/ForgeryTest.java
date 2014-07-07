@@ -22,7 +22,7 @@ public class ForgeryTest {
     public ExpectedException expectedException = none();
 
     @Test
-    public void shouldCreateBasicInstanceOfJdkClass() {
+    public void shouldCreateInstanceOfClass() {
         // When
         String string = Forgery.forge(String.class);
 
