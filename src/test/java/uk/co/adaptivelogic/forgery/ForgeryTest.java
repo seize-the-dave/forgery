@@ -22,18 +22,14 @@ public class ForgeryTest {
     public ExpectedException expectedException = none();
 
     @Test
-    public void shouldCreateBasicInstanceOfClass() {
+    public void shouldCreateBasicInstanceOfJdkClass() {
         // When
-        Person person = Forgery.forge(Person.class);
+        String string = Forgery.forge(String.class);
 
         // Then
-        assertThat(person, is(notNullValue()));
-        assertThat(person.getFirstName(), is(notNullValue()));
-        assertThat(person.getLastName(), is(notNullValue()));
-        
-        System.out.println(person);
+        assertThat(string, is(notNullValue()));
     }
-
+    
     @Test
     public void shouldThrowNullPointerWhenPassingNullObjectWithUsefulMessageForUser() {
         // Then
