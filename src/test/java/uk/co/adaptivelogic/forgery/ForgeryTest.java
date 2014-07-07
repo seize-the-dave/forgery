@@ -24,10 +24,21 @@ public class ForgeryTest {
     @Test
     public void shouldCreateInstanceOfClass() {
         // When
-        String string = Forgery.forge(String.class);
+        String string = forge(String.class);
 
         // Then
         assertThat(string, is(notNullValue()));
+    }
+    
+    @Test
+    public void shouldCreateInstanceOfClassWithProperties() {
+        // When
+        Person person = forge(Person.class);
+        
+        // Then
+        assertThat(person, is(notNullValue()));
+        assertThat(person.getFirstName(), is(notNullValue()));
+        assertThat(person.getLastName(), is(notNullValue()));
     }
     
     @Test
