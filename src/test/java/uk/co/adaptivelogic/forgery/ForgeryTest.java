@@ -79,4 +79,14 @@ public class ForgeryTest {
 		assertThat(actual, is(notNullValue()));
 	}
 
+	@Test
+	public void showFillPropertyWithRelevantData() {
+		// When
+		Person person = new Forgery(new FirstNameStringForger(), new LastNameStringForger()).forge(Person.class);
+
+		// Then
+		assertThat(person.getFirstName(), is("John"));
+		assertThat(person.getLastName(), is("Smith"));
+	}
+
 }

@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,10 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Forgery {
 	private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
-	private Map<Type, Forger<?>> forgerMap = new HashMap<Type, Forger<?>>();
+	public static final Pattern MATCH_NOTHING = Pattern.compile("^$");
+	private Map<Type, Map<Pattern, Forger<?>>> forgerMap = new HashMap<Type, Map<Pattern, Forger<?>>>();
 
-	public Forgery(Forger forger) {
-		addToForgerMap(forger);
+	public Forgery(Forger... forgers) {
+		this();
+		for (Forger forger : forgers) {
+			addToForgerMap(forger);
+		}
 	}
 
 	public Forgery() {
@@ -41,7 +46,18 @@ public class Forgery {
 	}
 
 	private void addToForgerMap(Forger forger) {
-		forgerMap.put(getGenericType(forger), forger);
+		Pattern pattern;
+		if (forger.getClass().getAnnotation(Property.class) == null) {
+			pattern = MATCH_NOTHING;
+		} else {
+			pattern = Pattern.compile(forger.getClass().getAnnotation(Property.class).value());
+		}
+		Type genericType = getGenericType(forger);
+		if (!forgerMap.containsKey(genericType)) {
+			Map<Pattern, Forger<?>> patternMap = new HashMap<Pattern, Forger<?>>();
+			forgerMap.put(genericType, patternMap);
+		}
+		forgerMap.get(genericType).put(pattern, forger);
 	}
 
 	private Type getGenericType(Forger forger) {
@@ -58,16 +74,32 @@ public class Forgery {
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
 			if (forgerMap.containsKey(type)) {
-				return (T) forgerMap.get(type).forge();
-			} else {
-				forgedType = type.newInstance();
-				forgeProperties(type, forgedType);
+				return (T) forgerMap.get(type).get(MATCH_NOTHING).forge();
 			}
+			forgedType = type.newInstance();
+			forgeProperties(type, forgedType);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
 
 		return forgedType;
+	}
+
+	public <T> T forge(@Nonnull Class<T> type, String property) {
+		try {
+			type = checkNotNull(type, MISSION_IMPOSSIBLE);
+			if (forgerMap.containsKey(type)) {
+				Map<Pattern, Forger<?>> patternMap = forgerMap.get(type);
+				for (Map.Entry<Pattern, Forger<?>> entry : patternMap.entrySet()) {
+					if (entry.getKey().matcher(property).matches()) {
+						return (T) entry.getValue().forge();
+					}
+				}
+			}
+			return forge(type);
+		} catch (Exception e) {
+			throw Throwables.propagate(e);
+		}
 	}
 
 	private <T> void forgeProperties(Class<T> type, T generatedType) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
@@ -81,7 +113,7 @@ public class Forgery {
 	private <T> void forgeProperty(T type, PropertyDescriptor property) throws IllegalAccessException, InvocationTargetException {
 		Method write = property.getWriteMethod();
 		if (write != null) {
-			write.invoke(type, forge(property.getPropertyType()));
+			write.invoke(type, forge(property.getPropertyType(), property.getName()));
 		}
 	}
 }
