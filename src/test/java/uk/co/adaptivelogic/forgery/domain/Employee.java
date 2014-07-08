@@ -3,9 +3,9 @@ package uk.co.adaptivelogic.forgery.domain;
 import com.google.common.base.Objects;
 
 /**
- * Person type
+ * Employee type
  */
-public class Person {
+public class Employee {
 	private String firstName;
 	private String lastName;
 

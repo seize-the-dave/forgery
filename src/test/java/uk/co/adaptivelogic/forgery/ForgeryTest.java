@@ -1,9 +1,16 @@
 package uk.co.adaptivelogic.forgery;
 
+import com.google.common.reflect.TypeToInstanceMap;
+import com.google.common.reflect.TypeToken;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.co.adaptivelogic.forgery.domain.Person;
+import uk.co.adaptivelogic.forgery.domain.Employee;
+import uk.co.adaptivelogic.forgery.domain.Manager;
+
+import java.lang.annotation.ElementType;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -29,7 +36,7 @@ public class ForgeryTest {
 	@Test
 	public void shouldCreateInstanceOfClassWithProperties() {
 		// When
-		Person person = new Forgery().forge(Person.class);
+		Employee person = new Forgery().forge(Employee.class);
 
 		// Then
 		assertThat(person, is(notNullValue()));
@@ -80,13 +87,42 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void showFillPropertyWithRelevantData() {
+	public void shouldFillPropertyWithRelevantData() {
 		// When
-		Person person = new Forgery(new FirstNameStringForger(), new LastNameStringForger()).forge(Person.class);
+		Employee employee = new Forgery(new FirstNameStringForger(), new LastNameStringForger()).forge(Employee.class);
 
 		// Then
-		assertThat(person.getFirstName(), is("John"));
-		assertThat(person.getLastName(), is("Smith"));
+		assertThat(employee.getFirstName(), is("John"));
+		assertThat(employee.getLastName(), is("Smith"));
+	}
+
+	@Test
+	public void shouldCreateClassWithParameterizedProperty() {
+		// When
+		Manager manager = new Forgery(new FirstNameStringForger(), new LastNameStringForger(), new Forger<List<Employee>>() {
+			@Override
+			public List<Employee> forge() {
+				return new ArrayList<Employee>();
+			}
+		}).forge(Manager.class);
+
+		// Then
+		assertThat(manager.getFirstName(), is("John"));
+		assertThat(manager.getLastName(), is("Smith"));
+	}
+
+	@Test
+	public void shouldCreateParameterizedType() {
+		// When
+		List<Employee> employees = new Forgery(new Forger<List<Employee>>() {
+			@Override
+			public List<Employee> forge() {
+				return new ArrayList<Employee>();
+			}
+		}).forge(new TypeToken<List<Employee>>() {}.getType());
+
+		// Then
+		assertThat(employees, is(notNullValue()));
 	}
 
 }

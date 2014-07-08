@@ -61,18 +61,21 @@ public class Forgery {
 		return type.getActualTypeArguments()[0];
 	}
 
-	public <T> T forge(@Nonnull Class<T> type) {
+	public <T> T forge(@Nonnull Type type) {
 		T forgedType;
 
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
+			log("Forging " + type);
 			if (forgerMap.containsKey(type)) {
 				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge();
 				if (forged.isPresent()) {
 					return forged.get();
 				}
+			} else {
+				log("No Forger available for " + type);
 			}
-			forgedType = type.newInstance();
+			forgedType = ((Class<T>) type).newInstance();
 			forgeProperties(type, forgedType);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
@@ -81,14 +84,19 @@ public class Forgery {
 		return forgedType;
 	}
 
-	public <T> T forge(@Nonnull Class<T> type, String property) {
+	public <T> T forge(@Nonnull Type type, String property) {
+		log("Forging " + property + " (" + type + ")");
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
 			if (forgerMap.containsKey(type)) {
 				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge(property);
 				if (forged.isPresent()) {
 					return forged.get();
+				} else {
+					log("No Forger available for " + property + " (" + type + ")");
 				}
+			} else {
+				log("No Forger available for " + property + " (" + type + ")");
 			}
 			return forge(type);
 		} catch (Exception e) {
@@ -96,18 +104,23 @@ public class Forgery {
 		}
 	}
 
-	private <T> void forgeProperties(Class<T> type, T generatedType) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
-		BeanInfo beanInfo = Introspector.getBeanInfo(type);
+	private <T> void forgeProperties(Type type, T forgedObject) throws IntrospectionException, IllegalAccessException, InvocationTargetException {
+		BeanInfo beanInfo = Introspector.getBeanInfo(forgedObject.getClass());
 		PropertyDescriptor[] properties = beanInfo.getPropertyDescriptors();
 		for (PropertyDescriptor property : properties) {
-			forgeProperty(generatedType, property);
+			forgeProperty(forgedObject, property);
 		}
 	}
 
-	private <T> void forgeProperty(T type, PropertyDescriptor property) throws IllegalAccessException, InvocationTargetException {
+	private <T> void forgeProperty(T forgedObject, PropertyDescriptor property) throws IllegalAccessException, InvocationTargetException {
 		Method write = property.getWriteMethod();
+		Method read = property.getReadMethod();
 		if (write != null) {
-			write.invoke(type, forge(property.getPropertyType(), property.getName()));
+			write.invoke(forgedObject, forge(TypeToken.of(read.getGenericReturnType()).getType(), property.getName()));
 		}
+	}
+
+	private void log(String message) {
+		System.out.println(message);
 	}
 }

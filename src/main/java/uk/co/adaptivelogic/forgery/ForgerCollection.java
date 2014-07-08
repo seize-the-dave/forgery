@@ -25,6 +25,7 @@ public class ForgerCollection<T> {
 	public Optional<T> forge(String property) {
 		for (Map.Entry<Pattern, Forger<T>> entry : map.entrySet()) {
 			if (entry.getKey().matcher(property).matches()) {
+				log("Using " + entry.getValue() + " to forge property " + property);
 				return Optional.of(entry.getValue().forge());
 			}
 		}
@@ -33,9 +34,14 @@ public class ForgerCollection<T> {
 
 	public Optional<T> forge() {
 		if (map.containsKey(MATCH_NOTHING)) {
+			log("Using " + map.get(MATCH_NOTHING));
 			return Optional.of(map.get(MATCH_NOTHING).forge());
 		} else {
 			return Optional.absent();
 		}
+	}
+
+	private void log(String message) {
+		System.out.println(message);
 	}
 }
