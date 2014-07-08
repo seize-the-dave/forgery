@@ -109,7 +109,9 @@ public class Forgery {
 		Method write = property.getWriteMethod();
 		Method read = property.getReadMethod();
 		if (write != null) {
-			write.invoke(forgedObject, forge(TypeToken.of(read.getGenericReturnType()).getType(), property.getName()));
+			T value = forge(TypeToken.of(read.getGenericReturnType()).getType(), property.getName());
+			log("Setting '" + property.getName() + "' to '" + value + "'");
+			write.invoke(forgedObject, value);
 		}
 	}
 

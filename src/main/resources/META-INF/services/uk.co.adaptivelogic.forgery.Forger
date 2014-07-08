@@ -1,0 +1,7 @@
+uk.co.adaptivelogic.forgery.forger.RandomDateForger
+uk.co.adaptivelogic.forgery.forger.RandomDateOfBirthForger
+uk.co.adaptivelogic.forgery.forger.RandomDoubleForger
+uk.co.adaptivelogic.forgery.forger.RandomIntegerForger
+uk.co.adaptivelogic.forgery.forger.RandomLongForger
+uk.co.adaptivelogic.forgery.forger.RandomNationalInsuranceNumberStringForger
+uk.co.adaptivelogic.forgery.forger.RandomSocialSecurityNumberStringForger

@@ -69,15 +69,6 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void shouldFailWhenCreatingInstanceWithoutDefaultConstructor() {
-		// Then
-		expectedException.expectCause(isA(InstantiationException.class));
-
-		// When
-		new Forgery.Builder().build().forge(Integer.class);
-	}
-
-	@Test
 	public void shouldCreateInstanceOfClassUsingLoadedForger() {
 		// When
 		Long actual = new Forgery.Builder().build().forge(Long.class);
@@ -132,4 +123,15 @@ public class ForgeryTest {
 		assertThat(employees, is(notNullValue()));
 	}
 
+	@Test
+	public void shouldWorkMultipleTimes() {
+		System.out.println("Caching Test");
+		// When
+		Forgery forgery = new Forgery.Builder().build();
+
+		// Then
+		assertThat(forgery.forge(Employee.class), is(notNullValue()));
+		assertThat(forgery.forge(Employee.class), is(notNullValue()));
+		assertThat(forgery.forge(Employee.class), is(notNullValue()));
+	}
 }
