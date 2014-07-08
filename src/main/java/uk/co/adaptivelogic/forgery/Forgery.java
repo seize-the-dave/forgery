@@ -3,6 +3,8 @@ package uk.co.adaptivelogic.forgery;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.beans.BeanInfo;
@@ -13,9 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ServiceLoader;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -30,20 +30,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Forgery {
 	private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
+	private static final Logger LOGGER = LoggerFactory.getLogger(Forgery.class);
 	private Map<Type, ForgerCollection<?>> forgerMap = new HashMap<Type, ForgerCollection<?>>();
 
-	public Forgery(Forger<?>... forgers) {
-		this();
+	private Forgery(Iterable<Forger<?>> forgers) {
 		for (Forger<?> forger : forgers) {
 			addToForgerMap(forger);
 		}
 	}
-
-	public Forgery() {
-		for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
-			addToForgerMap(forger);
-		}
-}
 
 	private void addToForgerMap(Forger forger) {
 		Type genericType = getGenericType(forger);
@@ -66,17 +60,19 @@ public class Forgery {
 
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
-			log("Forging " + type);
+			log("Attempting to forge " + type);
 			if (forgerMap.containsKey(type)) {
 				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge();
 				if (forged.isPresent()) {
 					return forged.get();
 				}
-			} else {
-				log("No Forger available for " + type);
 			}
+			log("No forger found for " + type);
+			log("Creating a new instance of " + type + " using default constructor");
 			forgedType = ((Class<T>) type).newInstance();
+			log("Forging properties for " + type);
 			forgeProperties(type, forgedType);
+			log("Finished forging " + type);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
 		}
@@ -85,19 +81,16 @@ public class Forgery {
 	}
 
 	public <T> T forge(@Nonnull Type type, String property) {
-		log("Forging " + property + " (" + type + ")");
+		log("Attempting to forge " + type + " for property '" + property + "'");
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
 			if (forgerMap.containsKey(type)) {
 				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge(property);
 				if (forged.isPresent()) {
 					return forged.get();
-				} else {
-					log("No Forger available for " + property + " (" + type + ")");
 				}
-			} else {
-				log("No Forger available for " + property + " (" + type + ")");
 			}
+			log("No forger found for " + type + " for '" + property + "'; attempt to forge type instead");
 			return forge(type);
 		} catch (Exception e) {
 			throw Throwables.propagate(e);
@@ -121,6 +114,25 @@ public class Forgery {
 	}
 
 	private void log(String message) {
-		System.out.println(message);
+		LOGGER.info(message);
+	}
+
+	public static class Builder {
+		private List<Forger<?>> forgers = new ArrayList<Forger<?>>();
+
+		public Builder() {
+			for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
+				forgers.add(forger);
+			}
+		}
+
+		public Builder withForger(Forger<?> forger) {
+			forgers.add(forger);
+			return this;
+		}
+
+		public Forgery build() {
+			return new Forgery(forgers);
+		}
 	}
 }

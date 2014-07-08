@@ -27,7 +27,7 @@ public class ForgeryTest {
 	@Test
 	public void shouldCreateInstanceOfClass() {
 		// When
-		String string = new Forgery().forge(String.class);
+		String string = new Forgery.Builder().build().forge(String.class);
 
 		// Then
 		assertThat(string, is(notNullValue()));
@@ -36,7 +36,7 @@ public class ForgeryTest {
 	@Test
 	public void shouldCreateInstanceOfClassWithProperties() {
 		// When
-		Employee person = new Forgery().forge(Employee.class);
+		Employee person = new Forgery.Builder().build().forge(Employee.class);
 
 		// Then
 		assertThat(person, is(notNullValue()));
@@ -52,7 +52,7 @@ public class ForgeryTest {
 			}
 		};
 		// When
-		String string = new Forgery(forger).forge(String.class);
+		String string = new Forgery.Builder().withForger(forger).build().forge(String.class);
 
 		// Then
 		assertThat(string, is("Example"));
@@ -65,7 +65,7 @@ public class ForgeryTest {
 		expectedException.expectMessage("Mission Impossible attempting to forge null classes :)");
 
 		// When
-		new Forgery().forge(null);
+		new Forgery.Builder().build().forge(null);
 	}
 
 	@Test
@@ -74,13 +74,13 @@ public class ForgeryTest {
 		expectedException.expectCause(isA(InstantiationException.class));
 
 		// When
-		new Forgery().forge(Integer.class);
+		new Forgery.Builder().build().forge(Integer.class);
 	}
 
 	@Test
 	public void shouldCreateInstanceOfClassUsingLoadedForger() {
 		// When
-		Long actual = new Forgery().forge(Long.class);
+		Long actual = new Forgery.Builder().build().forge(Long.class);
 
 		// Then
 		assertThat(actual, is(notNullValue()));
@@ -89,7 +89,10 @@ public class ForgeryTest {
 	@Test
 	public void shouldFillPropertyWithRelevantData() {
 		// When
-		Employee employee = new Forgery(new FirstNameStringForger(), new LastNameStringForger()).forge(Employee.class);
+		Employee employee = new Forgery.Builder()
+				.withForger(new FirstNameStringForger())
+				.withForger(new LastNameStringForger())
+				.build().forge(Employee.class);
 
 		// Then
 		assertThat(employee.getFirstName(), is("John"));
@@ -99,12 +102,15 @@ public class ForgeryTest {
 	@Test
 	public void shouldCreateClassWithParameterizedProperty() {
 		// When
-		Manager manager = new Forgery(new FirstNameStringForger(), new LastNameStringForger(), new Forger<List<Employee>>() {
-			@Override
-			public List<Employee> forge() {
-				return new ArrayList<Employee>();
-			}
-		}).forge(Manager.class);
+		Manager manager = new Forgery.Builder()
+				.withForger(new FirstNameStringForger())
+				.withForger(new LastNameStringForger())
+				.withForger(new Forger<List<Employee>>() {
+					@Override
+					public List<Employee> forge() {
+						return new ArrayList<Employee>();
+					}})
+				.build().forge(Manager.class);
 
 		// Then
 		assertThat(manager.getFirstName(), is("John"));
@@ -114,12 +120,13 @@ public class ForgeryTest {
 	@Test
 	public void shouldCreateParameterizedType() {
 		// When
-		List<Employee> employees = new Forgery(new Forger<List<Employee>>() {
-			@Override
-			public List<Employee> forge() {
-				return new ArrayList<Employee>();
-			}
-		}).forge(new TypeToken<List<Employee>>() {}.getType());
+		List<Employee> employees = new Forgery.Builder()
+				.withForger(new Forger<List<Employee>>() {
+					@Override
+					public List<Employee> forge() {
+						return new ArrayList<Employee>();
+					}})
+				.build().forge(new TypeToken<List<Employee>>() {}.getType());
 
 		// Then
 		assertThat(employees, is(notNullValue()));
