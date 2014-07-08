@@ -49,7 +49,7 @@ Implementing a new Forger is pretty simple.  Just implement `uk.co.adaptivelogic
 Forgery will choose an appropriate implementation based on the property name used by your POJOs to reference your domain object.
 
 ```java
-@Property({"name", "otherName", ".*Name})
+@Property({"name", "otherName", ".*Name"})
 public class CustomForger implements Forger<DomainObject> {
     public DomainObject forge() {
        ...
