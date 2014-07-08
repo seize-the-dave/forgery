@@ -1,7 +1,7 @@
 Forgery [![Build Status](https://travis-ci.org/adaptive-logic/forgery.svg?branch=master)](https://travis-ci.org/adaptive-logic/forgery)
 =======
 
-Forgery fills graphs of domain POJOs with fake data
+Forgery fills object graphs of POJOs with realistic dummy data
 
 Usage
 -----
