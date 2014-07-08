@@ -3,8 +3,10 @@ package uk.co.adaptivelogic.forgery;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
+import com.google.common.base.Verify;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
+import org.omg.Dynamic.Parameter;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -14,10 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.annotation.Nonnull;
 
@@ -35,38 +34,38 @@ public class Forgery {
     private Map<Type, Forger<?>> forgerMap = new HashMap<Type, Forger<?>>();
     
     public Forgery(Forger forger) {
-        forgerMap.put(getGenericType(forger), forger);
-    }
+		addToForgerMap(forger);
+	}
+
+	private void addToForgerMap(Forger forger) {
+		forgerMap.put(getGenericType(forger), forger);
+	}
+
+	public Forgery() {
+		for (Forger forger : ServiceLoader.load(Forger.class)) {
+			addToForgerMap(forger);
+		}
+	}
     
     private Type getGenericType(Forger forger) {
-        for (Type type : forger.getClass().getGenericInterfaces()) {
-            if (type instanceof ParameterizedType) {
-                ParameterizedType parameterizedType = ParameterizedType.class.cast(type);
-                if (parameterizedType.getRawType().equals(Forger.class)) {
-                    return getGenericType(parameterizedType);
-                }
-            }
-        }
-        throw new RuntimeException();
+		return getGenericType((ParameterizedType) TypeToken.of(forger.getClass()).getSupertype(Forger.class).getType());
     }
     
     private Type getGenericType(ParameterizedType type) {
         return type.getActualTypeArguments()[0];
     }
-    
-    public Forgery() {
-        
-    }
-    
+
     public <T> T forge(@Nonnull Class<T> type) {
         T forgedType;
 
         try {
-            if (forgerMap.containsKey(type)) {
+			type = checkNotNull(type, MISSION_IMPOSSIBLE);
+			if (forgerMap.containsKey(type)) {
                 return (T) forgerMap.get(type).forge();
-            }
-            forgedType = checkNotNull(type, MISSION_IMPOSSIBLE).newInstance();
-            forgeProperties(type, forgedType);
+            } else {
+				forgedType = type.newInstance();
+				forgeProperties(type, forgedType);
+			}
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }

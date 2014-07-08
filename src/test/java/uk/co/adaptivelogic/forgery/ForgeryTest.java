@@ -7,10 +7,7 @@ import org.junit.Test;
 import uk.co.adaptivelogic.forgery.domain.Person;
 import org.junit.rules.ExpectedException;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
 
@@ -65,5 +62,23 @@ public class ForgeryTest {
         // When
         new Forgery().forge(null);
     }
+
+	@Test
+	public void shouldFailWhenCreatingInstanceWithoutDefaultConstructor() {
+		// Then
+		expectedException.expectCause(isA(InstantiationException.class));
+
+		// When
+		new Forgery().forge(Integer.class);
+	}
+
+	@Test
+	public void shouldCreateInstanceOfClassUsingLoadedForger() {
+		// When
+		Long actual = new Forgery().forge(Long.class);
+
+		// Then
+		assertThat(actual, is(notNullValue()));
+	}
 
 }
