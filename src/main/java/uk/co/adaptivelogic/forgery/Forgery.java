@@ -43,7 +43,7 @@ public class Forgery {
 		for (Forger forger : ServiceLoader.load(Forger.class)) {
 			addToForgerMap(forger);
 		}
-	}
+}
 
 	private void addToForgerMap(Forger forger) {
 		Pattern pattern;

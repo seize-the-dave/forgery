@@ -1,4 +1,6 @@
-package uk.co.adaptivelogic.forgery;
+package uk.co.adaptivelogic.forgery.forger;
+
+import uk.co.adaptivelogic.forgery.Forger;
 
 import java.util.Random;
 

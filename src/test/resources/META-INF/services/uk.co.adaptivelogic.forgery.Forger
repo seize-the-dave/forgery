@@ -1,2 +1,2 @@
-uk.co.adaptivelogic.forgery.RandomLongForger
-uk.co.adaptivelogic.forgery.RandomDoubleForger
+uk.co.adaptivelogic.forgery.forger.RandomLongForger
+uk.co.adaptivelogic.forgery.forger.RandomDoubleForger
