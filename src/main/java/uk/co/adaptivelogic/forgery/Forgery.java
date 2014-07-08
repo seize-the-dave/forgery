@@ -1,5 +1,6 @@
 package uk.co.adaptivelogic.forgery;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.reflect.TypeToken;
 
@@ -29,35 +30,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Forgery {
 	private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
-	public static final Pattern MATCH_NOTHING = Pattern.compile("^$");
-	private Map<Type, Map<Pattern, Forger<?>>> forgerMap = new HashMap<Type, Map<Pattern, Forger<?>>>();
+	private Map<Type, ForgerCollection<?>> forgerMap = new HashMap<Type, ForgerCollection<?>>();
 
-	public Forgery(Forger... forgers) {
+	public Forgery(Forger<?>... forgers) {
 		this();
-		for (Forger forger : forgers) {
+		for (Forger<?> forger : forgers) {
 			addToForgerMap(forger);
 		}
 	}
 
 	public Forgery() {
-		for (Forger forger : ServiceLoader.load(Forger.class)) {
+		for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
 			addToForgerMap(forger);
 		}
 }
 
 	private void addToForgerMap(Forger forger) {
-		Pattern pattern;
-		if (forger.getClass().getAnnotation(Property.class) == null) {
-			pattern = MATCH_NOTHING;
-		} else {
-			pattern = Pattern.compile(forger.getClass().getAnnotation(Property.class).value());
-		}
 		Type genericType = getGenericType(forger);
 		if (!forgerMap.containsKey(genericType)) {
-			Map<Pattern, Forger<?>> patternMap = new HashMap<Pattern, Forger<?>>();
-			forgerMap.put(genericType, patternMap);
+			forgerMap.put(genericType, new ForgerCollection());
 		}
-		forgerMap.get(genericType).put(pattern, forger);
+		forgerMap.get(genericType).add(forger);
 	}
 
 	private Type getGenericType(Forger forger) {
@@ -74,7 +67,10 @@ public class Forgery {
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
 			if (forgerMap.containsKey(type)) {
-				return (T) forgerMap.get(type).get(MATCH_NOTHING).forge();
+				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge();
+				if (forged.isPresent()) {
+					return forged.get();
+				}
 			}
 			forgedType = type.newInstance();
 			forgeProperties(type, forgedType);
@@ -89,11 +85,9 @@ public class Forgery {
 		try {
 			type = checkNotNull(type, MISSION_IMPOSSIBLE);
 			if (forgerMap.containsKey(type)) {
-				Map<Pattern, Forger<?>> patternMap = forgerMap.get(type);
-				for (Map.Entry<Pattern, Forger<?>> entry : patternMap.entrySet()) {
-					if (entry.getKey().matcher(property).matches()) {
-						return (T) entry.getValue().forge();
-					}
+				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge(property);
+				if (forged.isPresent()) {
+					return forged.get();
 				}
 			}
 			return forge(type);
