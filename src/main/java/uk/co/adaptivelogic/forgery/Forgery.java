@@ -31,69 +31,42 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class Forgery {
 	private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
 	private static final Logger LOGGER = LoggerFactory.getLogger(Forgery.class);
-	private Map<Type, ForgerCollection<?>> forgerMap = new HashMap<Type, ForgerCollection<?>>();
+	private ForgerRegistry registry;
 
-	private Forgery(Iterable<Forger<?>> forgers) {
-		for (Forger<?> forger : forgers) {
-			addToForgerMap(forger);
-		}
-	}
-
-	private void addToForgerMap(Forger forger) {
-		Type genericType = getGenericType(forger);
-		if (!forgerMap.containsKey(genericType)) {
-			forgerMap.put(genericType, new ForgerCollection());
-		}
-		forgerMap.get(genericType).add(forger);
-	}
-
-	private Type getGenericType(Forger forger) {
-		return getGenericType((ParameterizedType) TypeToken.of(forger.getClass()).getSupertype(Forger.class).getType());
-	}
-
-	private Type getGenericType(ParameterizedType type) {
-		return type.getActualTypeArguments()[0];
+	public Forgery(ForgerRegistry registry) {
+		this.registry = registry;
 	}
 
 	public <T> T forge(@Nonnull Type type) {
-		T forgedType;
-
 		try {
-			type = checkNotNull(type, MISSION_IMPOSSIBLE);
-			log("Attempting to forge " + type);
-			if (forgerMap.containsKey(type)) {
-				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge();
-				if (forged.isPresent()) {
-					return forged.get();
-				}
+			LOGGER.info("Forging " + type);
+			Optional<Forger<T>> forger = registry.lookup(checkNotNull(type, MISSION_IMPOSSIBLE));
+			if (forger.isPresent()) {
+				return forger.get().forge();
+			} else {
+				LOGGER.info("Creating a new instance of " + type + " using no-arg constructor");
+				T forgedType = ((Class<T>) type).newInstance();
+				LOGGER.info("Forging properties of " + type);
+				forgeProperties(type, forgedType);
+				LOGGER.info("Forging complete for " + type);
+
+				return forgedType;
 			}
-			log("No forger found for " + type);
-			log("Creating a new instance of " + type + " using default constructor");
-			forgedType = ((Class<T>) type).newInstance();
-			log("Forging properties for " + type);
-			forgeProperties(type, forgedType);
-			log("Finished forging " + type);
 		} catch (Exception e) {
+			LOGGER.error("Forging failed for " + type, e);
 			throw Throwables.propagate(e);
 		}
-
-		return forgedType;
 	}
 
-	public <T> T forge(@Nonnull Type type, String property) {
-		log("Attempting to forge " + type + " for property '" + property + "'");
-		try {
-			type = checkNotNull(type, MISSION_IMPOSSIBLE);
-			if (forgerMap.containsKey(type)) {
-				Optional<T> forged = (Optional<T>) forgerMap.get(type).forge(property);
-				if (forged.isPresent()) {
-					return forged.get();
-				}
-			}
-			log("No forger found for " + type + " for '" + property + "'; attempt to forge type instead");
+	private <T> T forge(@Nonnull Type type, String property) {
+		LOGGER.info("Forging " + type + " for property '" + property + "'");
+		Optional<Forger<T>> forger = registry.lookup(type, property);
+		if (forger.isPresent()) {
+			LOGGER.info("Forging " + type + " for property '" + property + "'");
+			return forger.get().forge();
+		} else {
+			LOGGER.warn("Falling back to Forger for " + type);
 			return forge(type);
-		} catch (Exception e) {
-			throw Throwables.propagate(e);
 		}
 	}
 
@@ -110,31 +83,27 @@ public class Forgery {
 		Method read = property.getReadMethod();
 		if (write != null) {
 			T value = forge(TypeToken.of(read.getGenericReturnType()).getType(), property.getName());
-			log("Setting '" + property.getName() + "' to '" + value + "'");
+			LOGGER.info("Set '" + property.getName() + "' to '" + value + "'");
 			write.invoke(forgedObject, value);
 		}
 	}
 
-	private void log(String message) {
-		LOGGER.info(message);
-	}
-
 	public static class Builder {
-		private List<Forger<?>> forgers = new ArrayList<Forger<?>>();
+		private ForgerRegistry registry = new InMemoryForgerRegistry();
 
 		public Builder() {
 			for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
-				forgers.add(forger);
+				registry.register(forger);
 			}
 		}
 
 		public Builder withForger(Forger<?> forger) {
-			forgers.add(forger);
+			registry.register(forger);
 			return this;
 		}
 
 		public Forgery build() {
-			return new Forgery(forgers);
+			return new Forgery(registry);
 		}
 	}
 }
