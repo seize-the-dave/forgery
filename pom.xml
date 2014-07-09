@@ -91,5 +91,11 @@
           </plugin>
       </plugins>
   </build>
+  
+  <scm>
+  	<connection>scm:git:git://github.com/adaptive-logic/forgery.git</connection>
+  	<url>scm:git:git://github.com/adaptive-logic/forgery.git</url>
+  	<developerConnection>scm:git:git://github.com/adaptive-logic/forgery.git</developerConnection>
+  </scm>
 
 </project>
