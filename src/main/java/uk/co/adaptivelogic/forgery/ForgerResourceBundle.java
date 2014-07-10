@@ -9,7 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ForgerResourceBundle implements ForgerDataSource {
+public class ForgerResourceBundle implements ForgerDataSource<String> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ForgerResourceBundle.class);
 	
