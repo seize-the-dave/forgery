@@ -8,4 +8,7 @@ public interface ForgerRegistry {
 	public <T> void register(Forger<T> forger);
 	public <T> Optional<Forger<T>> lookup(Type type);
 	public <T> Optional<Forger<T>> lookup(Type type, String property);
+
+	public <T> void registerDataSource(String name, ForgerDataSource<T> dataSource);
+	public <T> Optional<ForgerDataSource<T>> lookupDataSource(String name);
 }

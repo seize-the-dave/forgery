@@ -4,5 +4,5 @@ import java.util.Locale;
 import java.util.Set;
 
 public interface ForgerDataSource<T> {
-	Set<T> getValues(Class clazz, Locale locale);
+	Set<T> getValues(Locale locale);
 }

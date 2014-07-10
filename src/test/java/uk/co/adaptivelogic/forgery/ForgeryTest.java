@@ -1,20 +1,28 @@
 package uk.co.adaptivelogic.forgery;
 
-import com.google.common.base.Optional;
-import com.google.common.reflect.TypeToken;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import uk.co.adaptivelogic.forgery.domain.Employee;
-import uk.co.adaptivelogic.forgery.domain.Manager;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.isA;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.rules.ExpectedException.none;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
-import static org.junit.rules.ExpectedException.none;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import uk.co.adaptivelogic.forgery.domain.Employee;
+import uk.co.adaptivelogic.forgery.domain.Manager;
+
+import com.google.common.base.Optional;
+import com.google.common.reflect.TypeToken;
 
 /**
  * Unit test to test and document the basic usage of {@link Forgery}
@@ -156,6 +164,21 @@ public class ForgeryTest {
 		forgery.forge(Forgery.class);
 	}
 
+	@Test
+	public void shouldLoadDataSource() {
+		//Given
+		ForgerDataSource<String> dataSource = new ForgerResourceBundle.Builder().name("FirstNameStringForger").build();
+		Forgery forgery = new Forgery.Builder().withForgerDataSource("myStrings", dataSource).build();
+
+		//When
+		Optional<ForgerDataSource<String>> lookupDataSource = forgery.getRegistry().lookupDataSource("myStrings");
+		Set<String> values = lookupDataSource.get().getValues(Locale.ENGLISH);
+
+		//Then
+		assertThat(values.size(), equalTo(5));
+		assertTrue(values.contains("Dave"));
+	}
+
 	private static class FakeForgerRegistry implements ForgerRegistry {
 		@Override
 		public <T> void register(Forger<T> forger) {
@@ -169,6 +192,16 @@ public class ForgeryTest {
 
 		@Override
 		public <T> Optional<Forger<T>> lookup(Type type, String property) {
+			return Optional.absent();
+		}
+
+		@Override
+		public <T> void registerDataSource(String name, ForgerDataSource<T> dataSource) {
+
+		}
+
+		@Override
+		public <T> Optional<ForgerDataSource<T>> lookupDataSource(String name) {
 			return Optional.absent();
 		}
 	}

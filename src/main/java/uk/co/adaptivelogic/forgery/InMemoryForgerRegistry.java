@@ -2,6 +2,7 @@ package uk.co.adaptivelogic.forgery;
 
 import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 public class InMemoryForgerRegistry implements ForgerRegistry {
 	private Map<Type, Forger<?>> typeMap = new HashMap<Type, Forger<?>>();
 	private Map<Type, ForgerCollection<?>> parameterMap = new HashMap<Type, ForgerCollection<?>>();
+	private Map<String, ForgerDataSource<?>> dataSourceMap = new HashMap<String, ForgerDataSource<?>>();
 	private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryForgerRegistry.class);
 	private static final int FIRST_PARAMETER = 0;
 
@@ -75,5 +77,23 @@ public class InMemoryForgerRegistry implements ForgerRegistry {
 		ParameterizedType parameterizedType = ParameterizedType.class.cast(forgerType);
 
 		return parameterizedType.getActualTypeArguments()[FIRST_PARAMETER];
+	}
+
+	private Type getParameterType(ForgerDataSource<?> forger) {
+		Type forgerType = TypeToken.of(forger.getClass()).getSupertype(ForgerDataSource.class).getType();
+		ParameterizedType parameterizedType = ParameterizedType.class.cast(forgerType);
+
+		return parameterizedType.getActualTypeArguments()[FIRST_PARAMETER];
+	}
+
+	@Override
+	public <T> void registerDataSource(String name, ForgerDataSource<T> dataSource) {
+		LOGGER.info("Registering data source named {} as a data source of {}", name, getParameterType(dataSource));
+		dataSourceMap.put(name, dataSource);
+	}
+
+	@Override
+	public <T> Optional<ForgerDataSource<T>> lookupDataSource(String name) {
+		return Optional.of((ForgerDataSource<T>) dataSourceMap.get(name));
 	}
 }

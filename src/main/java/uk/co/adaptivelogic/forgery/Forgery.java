@@ -58,6 +58,10 @@ public class Forgery {
 		}
 	}
 
+	public ForgerRegistry getRegistry() {
+		return registry;
+	}
+
 	private <T> T forge(@Nonnull Type type, String property) {
 		LOGGER.info("Forging " + type + " for property '" + property + "'");
 		Optional<Forger<T>> forger = registry.lookup(type, property);
@@ -99,6 +103,11 @@ public class Forgery {
 
 		public Builder withForger(Forger<?> forger) {
 			registry.register(forger);
+			return this;
+		}
+
+		public Builder withForgerDataSource(String name, ForgerDataSource<?> dataSource) {
+			registry.registerDataSource(name, dataSource);
 			return this;
 		}
 
