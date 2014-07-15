@@ -1,15 +1,15 @@
 package uk.co.adaptivelogic.forgery.forger;
 
-import uk.co.adaptivelogic.forgery.Forger;
-import uk.co.adaptivelogic.forgery.Property;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
+import uk.co.adaptivelogic.forgery.AbstractForger;
+import uk.co.adaptivelogic.forgery.Property;
+
 @Property({"dateOfBirth", "birthDate"})
-public class RandomDateOfBirthForger implements Forger<Date> {
+public class RandomDateOfBirthForger extends AbstractForger<Date> {
 	public Date forge() {
 		Random rnd = new Random();
 

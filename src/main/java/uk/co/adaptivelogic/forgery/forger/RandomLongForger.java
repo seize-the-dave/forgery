@@ -1,10 +1,10 @@
 package uk.co.adaptivelogic.forgery.forger;
 
-import uk.co.adaptivelogic.forgery.Forger;
-
 import java.util.Random;
 
-public class RandomLongForger implements Forger<Long> {
+import uk.co.adaptivelogic.forgery.AbstractForger;
+
+public class RandomLongForger extends AbstractForger<Long> {
 	public Long forge() {
 		return new Random().nextLong();
 	}

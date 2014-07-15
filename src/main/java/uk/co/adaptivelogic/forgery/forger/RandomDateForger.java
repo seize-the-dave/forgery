@@ -1,11 +1,11 @@
 package uk.co.adaptivelogic.forgery.forger;
 
-import uk.co.adaptivelogic.forgery.Forger;
-
 import java.util.Date;
 import java.util.Random;
 
-public class RandomDateForger implements Forger<Date> {
+import uk.co.adaptivelogic.forgery.AbstractForger;
+
+public class RandomDateForger extends AbstractForger<Date> {
 	public Date forge() {
 		Date date = new Date();
 		date.setTime(new Random().nextLong());

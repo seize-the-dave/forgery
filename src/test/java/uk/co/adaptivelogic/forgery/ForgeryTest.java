@@ -1,18 +1,14 @@
 package uk.co.adaptivelogic.forgery;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.rules.ExpectedException.none;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,10 +49,15 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void shouldUseForgerForForgingClass() {
+	public void shouldUseForgerForForgingClass() throws ServiceException {
 		Forger<String> forger = new Forger<String>() {
 			public String forge() {
 				return "Example";
+			}
+
+			@Override
+			public void service(ServiceLocator locator) throws ServiceException {
+
 			}
 		};
 		// When
@@ -73,7 +74,7 @@ public class ForgeryTest {
 		expectedException.expectMessage("Mission Impossible attempting to forge null classes :)");
 
 		// When
-		Forgery forgery = new Forgery(new FakeForgerRegistry());
+		Forgery forgery = new Forgery(new FakeForgerRegistry(), new InMemoryServiceLocator());
 		forgery.forge(null);
 	}
 
@@ -87,7 +88,7 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void shouldFillPropertyWithRelevantData() {
+	public void shouldFillPropertyWithRelevantData() throws ServiceException {
 		// When
 		Employee employee = new Forgery.Builder()
 				.withForger(new FirstNameStringForger())
@@ -100,7 +101,7 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void shouldCreateClassWithParameterizedProperty() {
+	public void shouldCreateClassWithParameterizedProperty() throws ServiceException {
 		// When
 		Manager manager = new Forgery.Builder()
 				.withForger(new FirstNameStringForger())
@@ -109,6 +110,12 @@ public class ForgeryTest {
 					@Override
 					public List<Employee> forge() {
 						return new ArrayList<Employee>();
+					}
+
+					@Override
+					public void service(ServiceLocator locator)
+							throws ServiceException {
+
 					}})
 				.build().forge(Manager.class);
 
@@ -118,13 +125,19 @@ public class ForgeryTest {
 	}
 
 	@Test
-	public void shouldCreateParameterizedType() {
+	public void shouldCreateParameterizedType() throws ServiceException {
 		// When
 		List<Employee> employees = new Forgery.Builder()
 				.withForger(new Forger<List<Employee>>() {
 					@Override
 					public List<Employee> forge() {
 						return new ArrayList<Employee>();
+					}
+
+					@Override
+					public void service(ServiceLocator locator)
+							throws ServiceException {
+
 					}})
 				.build().forge(new TypeToken<List<Employee>>() {}.getType());
 
@@ -150,7 +163,7 @@ public class ForgeryTest {
 		expectedException.expectCause(isA(IllegalAccessException.class));
 
 		// When
-		Forgery forgery = new Forgery(new FakeForgerRegistry());
+		Forgery forgery = new Forgery(new FakeForgerRegistry(), new InMemoryServiceLocator());
 		forgery.forge(System.class);
 	}
 
@@ -160,23 +173,8 @@ public class ForgeryTest {
 		expectedException.expectCause(isA(InstantiationException.class));
 
 		// When
-		Forgery forgery = new Forgery(new FakeForgerRegistry());
+		Forgery forgery = new Forgery(new FakeForgerRegistry(), new InMemoryServiceLocator());
 		forgery.forge(Forgery.class);
-	}
-
-	@Test
-	public void shouldLoadDataSource() {
-		//Given
-		ForgerDataSource<String> dataSource = new ForgerResourceBundle.Builder().name("FirstNameStringForger").build();
-		Forgery forgery = new Forgery.Builder().withForgerDataSource("myStrings", dataSource).build();
-
-		//When
-		Optional<ForgerDataSource<String>> lookupDataSource = forgery.getRegistry().lookupDataSource("myStrings");
-		Set<String> values = lookupDataSource.get().getValues(Locale.ENGLISH);
-
-		//Then
-		assertThat(values.size(), equalTo(5));
-		assertTrue(values.contains("Dave"));
 	}
 
 	private static class FakeForgerRegistry implements ForgerRegistry {
@@ -192,16 +190,6 @@ public class ForgeryTest {
 
 		@Override
 		public <T> Optional<Forger<T>> lookup(Type type, String property) {
-			return Optional.absent();
-		}
-
-		@Override
-		public <T> void registerDataSource(String name, ForgerDataSource<T> dataSource) {
-
-		}
-
-		@Override
-		public <T> Optional<ForgerDataSource<T>> lookupDataSource(String name) {
 			return Optional.absent();
 		}
 	}

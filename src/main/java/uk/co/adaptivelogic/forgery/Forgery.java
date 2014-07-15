@@ -1,24 +1,26 @@
 package uk.co.adaptivelogic.forgery;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
-import com.google.common.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nonnull;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
+import com.google.common.reflect.TypeToken;
 
 /**
  * Entry point for the forgery of all domain objects.
@@ -32,9 +34,11 @@ public class Forgery {
 	private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
 	private static final Logger LOGGER = LoggerFactory.getLogger(Forgery.class);
 	private ForgerRegistry registry;
+	private ServiceLocator locator;
 
-	public Forgery(ForgerRegistry registry) {
+	public Forgery(ForgerRegistry registry, ServiceLocator locator) {
 		this.registry = registry;
+		this.locator = locator;
 	}
 
 	public <T> T forge(@Nonnull Type type) {
@@ -61,6 +65,8 @@ public class Forgery {
 	public ForgerRegistry getRegistry() {
 		return registry;
 	}
+
+	//TODO: add getServiceLocator() ?
 
 	private <T> T forge(@Nonnull Type type, String property) {
 		LOGGER.info("Forging " + type + " for property '" + property + "'");
@@ -94,25 +100,34 @@ public class Forgery {
 
 	public static class Builder {
 		private ForgerRegistry registry = new InMemoryForgerRegistry();
+		private ServiceLocator locator = new InMemoryServiceLocator();
+		private List<Forger<?>> forgers = new ArrayList<Forger<?>>();
 
 		public Builder() {
 			for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
-				registry.register(forger);
+				withForger(forger);
 			}
 		}
 
-		public Builder withForger(Forger<?> forger) {
-			registry.register(forger);
+		public Builder withServiceLocator(@Nonnull ServiceLocator locator) {
+			this.locator = locator;
 			return this;
 		}
 
-		public Builder withForgerDataSource(String name, ForgerDataSource<?> dataSource) {
-			registry.registerDataSource(name, dataSource);
+		public Builder withForger(Forger<?> forger) {
+			forgers.add(forger);
 			return this;
 		}
 
 		public Forgery build() {
-			return new Forgery(registry);
+			final Forgery forgery = new Forgery(registry, locator);
+
+			for (Forger<?> forger : forgers) {
+				forger.service(locator);
+				registry.register(forger);
+			}
+
+			return forgery;
 		}
 	}
 }
