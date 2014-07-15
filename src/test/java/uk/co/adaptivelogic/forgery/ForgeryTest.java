@@ -158,11 +158,6 @@ public class ForgeryTest {
 
 	private static class FakeForgerRegistry implements ForgerRegistry {
 		@Override
-		public <T> void register(Forger<T> forger) {
-
-		}
-
-		@Override
 		public <T> Optional<Forger<T>> lookup(Type type) {
 			return Optional.absent();
 		}

@@ -9,18 +9,11 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class ForgerRegistryTest {
-	private ForgerRegistry registry;
-
-	@Before
-	public void setUp() {
-		registry = new InMemoryForgerRegistry();
-	}
-
 	@Test
 	public void shouldFindTypeForger() {
 		// Given
 		Forger<Long> expected = new RandomLongForger();
-		registry.register(expected);
+        ForgerRegistry registry = new InMemoryForgerRegistry(expected);
 
 		// When
 		Optional<Forger<Long>> actual = registry.lookup(Long.class);
@@ -32,6 +25,7 @@ public class ForgerRegistryTest {
 	@Test
 	public void shouldNotFindTypeForgerForInvalidType() {
 		// When
+        ForgerRegistry registry = new InMemoryForgerRegistry();
 		Optional<Forger<String>> actual = registry.lookup(String.class);
 
 		// Then
@@ -42,7 +36,7 @@ public class ForgerRegistryTest {
 	public void shouldFindPropertyForgerForProperty() {
 		// Given
 		Forger<String> expected = new FirstNameStringForger();
-		registry.register(expected);
+        ForgerRegistry registry = new InMemoryForgerRegistry(expected);
 
 		// When
 		Optional<Forger<String>> actual = registry.lookup(String.class, "firstName");
@@ -55,7 +49,7 @@ public class ForgerRegistryTest {
 	public void shouldNotFindPropertyForgerForInvalidProperty() {
 		// Given
 		Forger<String> expected = new FirstNameStringForger();
-		registry.register(expected);
+        ForgerRegistry registry = new InMemoryForgerRegistry(expected);
 
 		// When
 		Optional<Forger<String>> actual = registry.lookup(String.class, "lastName");
