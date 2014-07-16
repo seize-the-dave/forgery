@@ -59,7 +59,7 @@ public class CustomForger implements Forger<DomainObject> {
 
 ## Building with Forgery
 
-Forgery -is- will shortly available from Maven Central:
+Forgery <del>is</del> <ins>will shortly be</ins> available from Maven Central:
 
 ```xml
 <dependency>
