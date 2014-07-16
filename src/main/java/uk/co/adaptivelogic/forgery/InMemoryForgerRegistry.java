@@ -1,22 +1,17 @@
 package uk.co.adaptivelogic.forgery;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
-import com.google.common.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class InMemoryForgerRegistry implements ForgerRegistry {
+public class InMemoryForgerRegistry extends ForgerRegistrySupport implements ForgerRegistry {
     private Map<Type, Forger<?>> typeMap = new HashMap<Type, Forger<?>>();
     private Map<Type, ForgerCollection<?>> parameterMap = new HashMap<Type, ForgerCollection<?>>();
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryForgerRegistry.class);
-    private static final int FIRST_PARAMETER = 0;
     
     public InMemoryForgerRegistry(Forger<?>... forgerList) {
         for (Forger<?> forger : forgerList) {
@@ -24,17 +19,17 @@ public class InMemoryForgerRegistry implements ForgerRegistry {
         }
     }
     
-    private <T> void register(Forger<T> forger) {
+    public <T> void register(Forger<T> forger) {
         LOGGER.info("Registering " + forger.getClass());
         Type forgerType = getParameterType(forger);
         if (forger.getClass().getAnnotation(Property.class) == null) {
             registerTypeForger(forgerType, forger);
         } else {
-            registerParameterForger(forgerType, forger);
+            registerPropertyForger(forgerType, forger);
         }
     }
 
-    private <T> void registerParameterForger(Type forgerType, Forger<T> forger) {
+    private <T> void registerPropertyForger(Type forgerType, Forger<T> forger) {
         LOGGER.info("Registering " + forger.getClass() + " as a property Forger");
         ForgerCollection<T> forgerCollection;
         if (!parameterMap.containsKey(forgerType)) {
@@ -75,12 +70,5 @@ public class InMemoryForgerRegistry implements ForgerRegistry {
             LOGGER.warn("Forger not found for " + type + " and property '" + property + "'");
             return Optional.absent();
         }
-    }
-
-    private Type getParameterType(Forger<?> forger) {
-        Type forgerType = TypeToken.of(forger.getClass()).getSupertype(Forger.class).getType();
-        ParameterizedType parameterizedType = ParameterizedType.class.cast(forgerType);
-
-        return parameterizedType.getActualTypeArguments()[FIRST_PARAMETER];
     }
 }

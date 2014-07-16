@@ -90,21 +90,22 @@ public class Forgery {
     }
 
     public static class Builder {
+        private ForgerRegistry registry = new InMemoryForgerRegistry();
         private List<Forger<?>> forgerList = new ArrayList<Forger<?>>();
 
         public Builder() {
             for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
-                forgerList.add(forger);
+                registry.register(forger);
             }
         }
 
         public Builder withForger(Forger<?> forger) {
-            forgerList.add(forger);
+            registry.register(forger);
             return this;
         }
 
         public Forgery build() {
-            return new Forgery(new InMemoryForgerRegistry(forgerList.toArray(new Forger[]{})));
+            return new Forgery(registry);
         }
     }
 }

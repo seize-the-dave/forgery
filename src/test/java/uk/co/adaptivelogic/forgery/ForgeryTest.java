@@ -160,6 +160,10 @@ public class ForgeryTest {
     }
 
     private static class FakeForgerRegistry implements ForgerRegistry {
+        public <T> void register(Forger<T> forger) {
+            // Do nothing
+        }
+        
         @Override
         public <T> Optional<Forger<T>> lookup(Type type) {
             return Optional.absent();
