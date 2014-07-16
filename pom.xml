@@ -45,8 +45,8 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git://github.com/adaptive-logic/forgery.git</connection>
-        <developerConnection>scm:git:git://github.com/adaptive-logic/forgery.git</developerConnection>
+        <connection>scm:git:https://github.com/adaptive-logic/forgery.git</connection>
+        <developerConnection>scm:git:https://github.com/adaptive-logic/forgery.git</developerConnection>
         <url>https://github.com/adaptive-logic/forgery</url>
     </scm>
     <issueManagement>
