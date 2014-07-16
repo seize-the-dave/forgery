@@ -1,14 +1,14 @@
 package uk.co.adaptivelogic.forgery.forger;
 
 import org.apache.commons.lang.RandomStringUtils;
-import uk.co.adaptivelogic.forgery.Forger;
 import uk.co.adaptivelogic.forgery.Property;
 
+import javax.inject.Provider;
 import java.util.Random;
 
 @Property({"niNumber", "nationalInsurance"})
-public class RandomNationalInsuranceNumberStringForger implements Forger<String> {
-	public String forge() {
+public class RandomNationalInsuranceNumberStringForger implements Provider<String> {
+	public String get() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(RandomStringUtils.randomAlphabetic(2).toUpperCase());
 		builder.append(" ");

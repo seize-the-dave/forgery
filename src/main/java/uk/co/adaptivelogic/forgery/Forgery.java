@@ -2,12 +2,12 @@ package uk.co.adaptivelogic.forgery;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.inject.Provider;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -26,11 +26,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p/>
  * <p>
  * If you need to auto create a class object then pass it to Forgery and let us provide a properly constructed
- * class for your use.  All you need to do is <pre>Forgery.forge(ToForge.class)</pre>
+ * class for your use.  All you need to do is <pre>Forgery.get(ToForge.class)</pre>
  * </p>
  */
 public class Forgery {
-    private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to forge null classes :)";
+    private static final String MISSION_IMPOSSIBLE = "Mission Impossible attempting to get null classes :)";
     private static final Logger LOGGER = LoggerFactory.getLogger(Forgery.class);
     private ForgerRegistry registry;
 
@@ -41,9 +41,9 @@ public class Forgery {
     public <T> T forge(@Nonnull Type type) {
         try {
             LOGGER.info("Forging " + type);
-            Optional<Forger<T>> forger = registry.lookup(checkNotNull(type, MISSION_IMPOSSIBLE));
+            Optional<Provider<T>> forger = registry.lookup(checkNotNull(type, MISSION_IMPOSSIBLE));
             if (forger.isPresent()) {
-                return forger.get().forge();
+                return forger.get().get();
             } else {
                 LOGGER.info("Creating a new instance of " + type + " using no-arg constructor");
                 T forgedType = ((Class<T>) type).newInstance();
@@ -61,10 +61,10 @@ public class Forgery {
 
     private <T> T forge(@Nonnull Type type, String property) {
         LOGGER.info("Forging " + type + " for property '" + property + "'");
-        Optional<Forger<T>> forger = registry.lookup(type, property);
+        Optional<Provider<T>> forger = registry.lookup(type, property);
         if (forger.isPresent()) {
             LOGGER.info("Forging " + type + " for property '" + property + "'");
-            return forger.get().forge();
+            return forger.get().get();
         } else {
             LOGGER.warn("Falling back to Forger for " + type);
             return forge(type);
@@ -91,15 +91,14 @@ public class Forgery {
 
     public static class Builder {
         private ForgerRegistry registry = new InMemoryForgerRegistry();
-        private List<Forger<?>> forgerList = new ArrayList<Forger<?>>();
 
         public Builder() {
-            for (Forger<?> forger : ServiceLoader.load(Forger.class)) {
+            for (Provider<?> forger : ServiceLoader.load(Provider.class)) {
                 registry.register(forger);
             }
         }
 
-        public Builder withForger(Forger<?> forger) {
+        public Builder withForger(Provider<?> forger) {
             registry.register(forger);
             return this;
         }

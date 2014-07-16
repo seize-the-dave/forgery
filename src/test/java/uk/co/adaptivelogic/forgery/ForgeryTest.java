@@ -8,6 +8,7 @@ import org.junit.rules.ExpectedException;
 import uk.co.adaptivelogic.forgery.domain.Employee;
 import uk.co.adaptivelogic.forgery.domain.Manager;
 
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +47,8 @@ public class ForgeryTest {
 
     @Test
     public void shouldUseForgerForForgingClass() {
-        Forger<String> forger = new Forger<String>() {
-            public String forge() {
+        Provider<String> forger = new Provider<String>() {
+            public String get() {
                 return "Example";
             }
         };
@@ -62,7 +63,7 @@ public class ForgeryTest {
     public void shouldThrowNullPointerWhenPassingNullObjectWithUsefulMessageForUser() {
         // Then
         expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("Mission Impossible attempting to forge null classes :)");
+        expectedException.expectMessage("Mission Impossible attempting to get null classes :)");
 
         // When
         Forgery forgery = new Forgery(new FakeForgerRegistry());
@@ -97,9 +98,9 @@ public class ForgeryTest {
         Manager manager = new Forgery.Builder()
                 .withForger(new FirstNameStringForger())
                 .withForger(new LastNameStringForger())
-                .withForger(new Forger<List<Employee>>() {
+                .withForger(new Provider<List<Employee>>() {
                     @Override
-                    public List<Employee> forge() {
+                    public List<Employee> get() {
                         return new ArrayList<Employee>();
                     }
                 })
@@ -114,9 +115,9 @@ public class ForgeryTest {
     public void shouldCreateParameterizedType() {
         // When
         List<Employee> employees = new Forgery.Builder()
-                .withForger(new Forger<List<Employee>>() {
+                .withForger(new Provider<List<Employee>>() {
                     @Override
-                    public List<Employee> forge() {
+                    public List<Employee> get() {
                         return new ArrayList<Employee>();
                     }
                 })
@@ -160,17 +161,17 @@ public class ForgeryTest {
     }
 
     private static class FakeForgerRegistry implements ForgerRegistry {
-        public <T> void register(Forger<T> forger) {
+        public <T> void register(Provider<T> forger) {
             // Do nothing
         }
         
         @Override
-        public <T> Optional<Forger<T>> lookup(Type type) {
+        public <T> Optional<Provider<T>> lookup(Type type) {
             return Optional.absent();
         }
 
         @Override
-        public <T> Optional<Forger<T>> lookup(Type type, String property) {
+        public <T> Optional<Provider<T>> lookup(Type type, String property) {
             return Optional.absent();
         }
     }

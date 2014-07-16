@@ -4,22 +4,17 @@ import com.google.common.base.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InMemoryForgerRegistry extends ForgerRegistrySupport implements ForgerRegistry {
-    private Map<Type, Forger<?>> typeMap = new HashMap<Type, Forger<?>>();
+    private Map<Type, Provider<?>> typeMap = new HashMap<Type, Provider<?>>();
     private Map<Type, ForgerCollection<?>> parameterMap = new HashMap<Type, ForgerCollection<?>>();
     private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryForgerRegistry.class);
     
-    public InMemoryForgerRegistry(Forger<?>... forgerList) {
-        for (Forger<?> forger : forgerList) {
-            register(forger);
-        }
-    }
-    
-    public <T> void register(Forger<T> forger) {
+    public <T> void register(Provider<T> forger) {
         LOGGER.info("Registering " + forger.getClass());
         Type forgerType = getParameterType(forger);
         if (forger.getClass().getAnnotation(Property.class) == null) {
@@ -29,7 +24,7 @@ public class InMemoryForgerRegistry extends ForgerRegistrySupport implements For
         }
     }
 
-    private <T> void registerPropertyForger(Type forgerType, Forger<T> forger) {
+    private <T> void registerPropertyForger(Type forgerType, Provider<T> forger) {
         LOGGER.info("Registering " + forger.getClass() + " as a property Forger");
         ForgerCollection<T> forgerCollection;
         if (!parameterMap.containsKey(forgerType)) {
@@ -41,17 +36,17 @@ public class InMemoryForgerRegistry extends ForgerRegistrySupport implements For
         forgerCollection.add(forger);
     }
 
-    private <T> void registerTypeForger(Type forgerType, Forger<T> forger) {
+    private <T> void registerTypeForger(Type forgerType, Provider<T> forger) {
         LOGGER.info("Registering " + forger.getClass() + " as a type Forger for " + forgerType);
         typeMap.put(forgerType, forger);
     }
 
     @Override
-    public <T> Optional<Forger<T>> lookup(Type type) {
+    public <T> Optional<Provider<T>> lookup(Type type) {
         LOGGER.info("Looking up Forger for " + type);
         if (typeMap.containsKey(type)) {
             LOGGER.info("Forger found for " + type);
-            return Optional.of((Forger<T>) typeMap.get(type));
+            return Optional.of((Provider<T>) typeMap.get(type));
         } else {
             LOGGER.warn("Forger not found for " + type);
             return Optional.absent();
@@ -59,7 +54,7 @@ public class InMemoryForgerRegistry extends ForgerRegistrySupport implements For
     }
 
     @Override
-    public <T> Optional<Forger<T>> lookup(Type type, String property) {
+    public <T> Optional<Provider<T>> lookup(Type type, String property) {
         LOGGER.info("Looking up Forger for " + type + " and property '" + property + "'");
         if (parameterMap.containsKey(type)) {
             ForgerCollection<T> forgerCollection = (ForgerCollection<T>) parameterMap.get(type);

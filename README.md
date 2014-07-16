@@ -13,7 +13,7 @@ Forgery forgery = new Forgery.Builder().build();
 Now you're ready to start forging your domain objects:
 
 ```java
-Employee employee = forgery.forge(Employee.class);
+Employee employee = forgery.get(Employee.class);
 employee.getFirstName(); // "John"
 employee.getLastName(); // "Smith"
 employee.getDateOfBirth(); // 11-Jan-1966
@@ -51,7 +51,7 @@ Forgery will choose an appropriate implementation based on the property name use
 ```java
 @Property({"name", "otherName", ".*Name"})
 public class CustomForger implements Forger<DomainObject> {
-    public DomainObject forge() {
+    public DomainObject get() {
        ...
     }
 }
