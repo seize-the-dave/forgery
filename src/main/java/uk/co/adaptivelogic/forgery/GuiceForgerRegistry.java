@@ -18,7 +18,7 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
     private Map<Key, Class<? extends Provider<?>>> forgerClassMap = new HashMap<Key, Class<? extends Provider<?>>>();
     
     @Override
-    public <T> void register(Provider<T> forger) {
+    public void register(Provider<?> forger) {
         LOGGER.info("Registering " + forger.getClass());
         Type forgerType = getParameterType(forger);
         if (forger.getClass().getAnnotation(Property.class) == null) {
@@ -28,7 +28,7 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
         }
     }
     
-    public <T> void register(Class<? extends Provider<T>> forgerClass) {
+    public void register(Class<? extends Provider<?>> forgerClass) {
         LOGGER.info("Registering " + forgerClass);
         Type forgerType = getParameterType(forgerClass);
         if (forgerClass.getAnnotation(Property.class) != null) {
@@ -71,7 +71,7 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
     }
 
     @Override
-    public <T> Optional<Provider<T>> lookup(Type type) {
+    public Optional<? extends Provider<?>> lookup(Type type) {
         LOGGER.info("Looking up Forger for " + type);
         Binding<?> binding = getInjector().getExistingBinding(Key.get(type));
         if (binding == null) {
@@ -79,12 +79,12 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
             return Optional.absent(); 
         } else {
             LOGGER.info("Forger found for " + type);
-            return Optional.of((Provider<T>) binding.getProvider());
+            return Optional.of(binding.getProvider());
         }
     }
 
     @Override
-    public <T> Optional<Provider<T>> lookup(Type type, String property) {
+    public Optional<? extends Provider<?>> lookup(Type type, String property) {
         LOGGER.info("Looking up Forger for " + type + " and property '" + property + "'");
         Binding<?> binding = getInjector().getExistingBinding(Key.get(type, Names.named(property)));
         if (binding == null) {
@@ -92,7 +92,7 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
             return Optional.absent();
         } else {
             LOGGER.info("Forger found for " + type);
-            return Optional.of((Provider<T>) binding.getProvider());
+            return Optional.of(binding.getProvider());
         }
     }
 }

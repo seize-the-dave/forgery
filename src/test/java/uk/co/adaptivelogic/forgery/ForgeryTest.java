@@ -161,11 +161,11 @@ public class ForgeryTest {
     }
 
     private static class FakeForgerRegistry implements ForgerRegistry {
-        public <T> void register(Provider<T> forger) {
+        public void register(Provider<?> forger) {
             // Do nothing
         }
         
-        public <T> void register(Class<? extends Provider<T>> forgerClass) {
+        public void register(Class<? extends Provider<?>> forgerClass) {
             // Do nothing
         }
         
