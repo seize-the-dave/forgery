@@ -90,7 +90,7 @@ public class Forgery {
     }
 
     public static class Builder {
-        private ForgerRegistry registry = new InMemoryForgerRegistry();
+        private ForgerRegistry registry = new GuiceForgerRegistry();
 
         public Builder() {
             for (Provider<?> forger : ServiceLoader.load(Provider.class)) {

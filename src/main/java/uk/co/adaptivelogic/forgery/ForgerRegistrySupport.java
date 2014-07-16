@@ -15,4 +15,11 @@ public class ForgerRegistrySupport {
 
         return parameterizedType.getActualTypeArguments()[FIRST_PARAMETER];
     }
+
+    protected Type getParameterType(Class<? extends Provider<?>> forgerClass) {
+        Type forgerType = TypeToken.of(forgerClass).getSupertype(Provider.class).getType();
+        ParameterizedType parameterizedType = ParameterizedType.class.cast(forgerType);
+
+        return parameterizedType.getActualTypeArguments()[FIRST_PARAMETER];
+    }
 }

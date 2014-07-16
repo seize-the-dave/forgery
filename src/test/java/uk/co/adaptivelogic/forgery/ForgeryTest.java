@@ -165,6 +165,10 @@ public class ForgeryTest {
             // Do nothing
         }
         
+        public <T> void register(Class<? extends Provider<T>> forgerClass) {
+            // Do nothing
+        }
+        
         @Override
         public <T> Optional<Provider<T>> lookup(Type type) {
             return Optional.absent();

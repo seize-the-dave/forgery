@@ -3,6 +3,7 @@ package uk.co.adaptivelogic.forgery;
 import com.google.common.base.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.adaptivelogic.forgery.domain.CompositeFixture;
 import uk.co.adaptivelogic.forgery.forger.RandomLongForger;
 
 import javax.inject.Provider;
@@ -76,5 +77,20 @@ public abstract class ForgerRegistryTest {
 
         // Then
         assertThat(actual.isPresent(), is(false));
+    }
+    
+    @Test
+    public void shouldUseCompositeForger() {
+        // Given
+        registry.register(FirstNameStringForger.class);
+        registry.register(LastNameStringForger.class);
+        registry.register(NameForger.class);
+        
+        // When
+        Optional<Provider<String>> actual = registry.lookup(String.class, "name");
+        
+        // Then
+        assertThat(actual.isPresent(), is(true));
+        assertThat(actual.get().get(), is("John Smith"));
     }
 }
