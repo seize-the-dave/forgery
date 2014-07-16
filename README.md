@@ -1,10 +1,10 @@
 # Forgery [![Build Status](https://travis-ci.org/adaptive-logic/forgery.svg?branch=master)](https://travis-ci.org/adaptive-logic/forgery)
 
-Forgery is a Java library for filling graphs of POJOs with realistic dummy data
+Forgery is a simple Java library for filling graphs of POJOs with _realistic_ dummy data.  Forgery uses JSR 330 (`javax.inject`) behind the scenes to provide data, which makes it very simple to extend.
 
 ## Usage
 
-Forgery comes with a bunch of default forgers.  To get hold of an instance, just build like so:
+Forgery comes with a bunch of default `javax.inject.Provider`s to cover common business domain objects.  To create an instance of Forgery, just build like so:
 
 ```java
 Forgery forgery = new Forgery.Builder().build();
@@ -21,45 +21,91 @@ employee.getDateOfBirth(); // 11-Jan-1966
 
 ### Extending Forgery
 
-You can extend Forgery in two ways.  Firstly, add a new Forger instance to the builder like so:
+You can extend Forgery in two ways.  Firstly, add a new `Provider` instance or `Class<? extends Provider>` to the builder directly, like so:
 
 ```java
-Forgery forgery = new Forgery.Builder().addForger(new CustomForger()).build();
+Forgery forgery = new Forgery.Builder()
+                             .addForger(new CustomProvider())
+                             .addForger(NameProvider.class)
+                             .build();
 ```
 
-Secondly, you can add your forger classes to the following file in any JAR on your classpath:
+Alternatively, you can add your `Provider` classes to the following file in any JAR on your classpath using the Java SE `ServiceLoader` utility:
 
 ```
-META-INF/services/uk.co.adaptivelogic.forgery.Forger
+META-INF/services/javax.inject.Provider
 ```
 
 The contents of the file should look like so:
 
 ```
-uk.co.adaptivelogic.forgery.forger.RandomDateForger
-uk.co.adaptivelogic.forgery.forger.RandomDateOfBirthForger
-uk.co.adaptivelogic.forgery.forger.RandomDoubleForger
-org.example.SpecificDomainForger
+uk.co.adaptivelogic.forgery.forger.RandomDateProvider
+uk.co.adaptivelogic.forgery.forger.RandomDateOfBirthProvider
+uk.co.adaptivelogic.forgery.forger.RandomDoubleProvider
+org.example.SpecificDomainProvider
 ```
 
-### Implementing a Forger
+`ServiceLoader` will instantiate each class using a no-args constructor, so this will only work for very simple self-contained providers.
 
-Implementing a new Forger is pretty simple.  Just implement `uk.co.adaptivelogic.forgery.Forger<T>` to return an instance of `T`, and optionally annotate your implementation with `uk.co.adaptivelogic.forgery.Property` if you want to provide more than one implementation for your class.
+### Creating a Provider
 
-Forgery will choose an appropriate implementation based on the property name used by your POJOs to reference your domain object.
+#### Step 1: Implement the Provider Interface
+
+Creating a new `Provider` is pretty simple.  Just implement `javax.inject.Provider<T>` to return an instance of `T` like so:
 
 ```java
-@Property({"name", "otherName", ".*Name"})
-public class CustomForger implements Forger<DomainObject> {
-    public DomainObject get() {
-       ...
+public class FirstNameProvider implements Provider<String> {
+    public String get() {
+       return "Bob";
     }
 }
 ```
 
+#### Step 2: Annotate to Match Properties
+
+The next step is to annotate your class with the `@Property` annotation to tell Forgery what properties to inject against.
+
+```java
+@Property("firstName")
+public class FirstNameProvider implements Provider<String> {
+    public String get() {
+       return "Bob";
+    }
+}
+```
+
+The `@Property` annotation can take multiple property names:
+
+```java
+@Property({"firstName", "foreName"})
+```
+
+#### Step 3: Use Injection to Compose Providers
+
+If your `Provider` is a composite of different types, you can reuse existing `Provider`s through dependency injection, like so:
+
+```java
+@Property("name")
+public class NameProvider implements Provider<String> {
+    private Provider<String> firstName;
+    private Provider<String> lastName;
+
+    public NameProvider(@Named("firstName") Provider<String> firstName, @Named("lastName") Provider<String> lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+    
+    public String get() {
+        return firstName.get() + " " + lastName.get();
+    }
+}
+```
+
+*Note*: you can currently only take advantage of dependency injection by registering your `Provider` *class* with the builder.  Registering an instance will not work; neither will using the `ServiceLoader` mechanism described above.
+
 ## Building with Forgery
 
-Forgery <del>is</del> <ins>will shortly be</ins> available from Maven Central:
+Forgery is available from Maven Central:
 
 ```xml
 <dependency>
