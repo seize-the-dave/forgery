@@ -41,9 +41,9 @@ public class Forgery {
     public <T> T forge(@Nonnull Type type) {
         try {
             LOGGER.info("Forging " + type);
-            Optional<Provider<T>> forger = registry.lookup(checkNotNull(type, MISSION_IMPOSSIBLE));
+            Optional<? extends Provider<?>> forger = registry.lookup(checkNotNull(type, MISSION_IMPOSSIBLE));
             if (forger.isPresent()) {
-                return forger.get().get();
+                return (T) forger.get().get();
             } else {
                 LOGGER.info("Creating a new instance of " + type + " using no-arg constructor");
                 T forgedType = ((Class<T>) type).newInstance();
@@ -61,10 +61,10 @@ public class Forgery {
 
     private <T> T forge(@Nonnull Type type, String property) {
         LOGGER.info("Forging " + type + " for property '" + property + "'");
-        Optional<Provider<T>> forger = registry.lookup(type, property);
+        Optional<? extends Provider<?>> forger = registry.lookup(type, property);
         if (forger.isPresent()) {
             LOGGER.info("Forging " + type + " for property '" + property + "'");
-            return forger.get().get();
+            return (T) forger.get().get();
         } else {
             LOGGER.warn("Falling back to Forger for " + type);
             return forge(type);
@@ -100,6 +100,11 @@ public class Forgery {
 
         public Builder withForger(Provider<?> forger) {
             registry.register(forger);
+            return this;
+        }
+        
+        public Builder withForger(Class<? extends Provider<?>> forgerClass) {
+            registry.register(forgerClass);
             return this;
         }
 

@@ -35,7 +35,7 @@ public abstract class ForgerRegistryTest {
         registry.register(expected);
 
         // When
-        Optional<Provider<Long>> actual = registry.lookup(Long.class);
+        Optional<? extends Provider<Long>> actual = registry.lookup(Long.class);
 
         // Then
         assertThat(actual.isPresent(), is(true));
@@ -45,7 +45,7 @@ public abstract class ForgerRegistryTest {
     @Test
     public void shouldNotFindTypeForgerForInvalidType() {
         // When
-        Optional<Provider<Long>> actual = registry.lookup(Long.class);
+        Optional<? extends Provider<Long>> actual = registry.lookup(Long.class);
 
         // Then
         System.out.println(actual);
@@ -59,7 +59,7 @@ public abstract class ForgerRegistryTest {
         registry.register(expected);
 
         // When
-        Optional<Provider<String>> actual = registry.lookup(String.class, "firstName");
+        Optional<? extends Provider<String>> actual = registry.lookup(String.class, "firstName");
 
         // Then
         assertThat(actual.isPresent(), is(true));
@@ -73,7 +73,7 @@ public abstract class ForgerRegistryTest {
         registry.register(expected);
 
         // When
-        Optional<Provider<String>> actual = registry.lookup(String.class, "lastName");
+        Optional<? extends Provider<String>> actual = registry.lookup(String.class, "lastName");
 
         // Then
         assertThat(actual.isPresent(), is(false));
@@ -87,7 +87,7 @@ public abstract class ForgerRegistryTest {
         registry.register(NameForger.class);
         
         // When
-        Optional<Provider<String>> actual = registry.lookup(String.class, "name");
+        Optional<? extends Provider<String>> actual = registry.lookup(String.class, "name");
         
         // Then
         assertThat(actual.isPresent(), is(true));
