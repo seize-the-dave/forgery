@@ -56,3 +56,16 @@ public class CustomForger implements Forger<DomainObject> {
     }
 }
 ```
+
+## Building with Forgery
+
+Forgery is available from Maven Central:
+
+```xml
+<dependency>
+  <groupId>uk.co.adaptivelogic</groupId>
+  <artifactId>forgery</artifactId>
+  <version>0.1.0</version>
+  <scope>test</scope>
+</dependency>
+```
