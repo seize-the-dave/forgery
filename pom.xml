@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.co.adaptivelogic</groupId>
     <artifactId>forgery</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Forgery</name>
     <description>Forgery is a Java library for filling graphs of POJOs with realistic dummy data</description>
