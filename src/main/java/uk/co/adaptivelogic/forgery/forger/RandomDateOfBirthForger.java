@@ -1,16 +1,16 @@
 package uk.co.adaptivelogic.forgery.forger;
 
-import uk.co.adaptivelogic.forgery.Forger;
 import uk.co.adaptivelogic.forgery.Property;
 
+import javax.inject.Provider;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
 @Property({"dateOfBirth", "birthDate"})
-public class RandomDateOfBirthForger implements Forger<Date> {
-	public Date forge() {
+public class RandomDateOfBirthForger implements Provider<Date> {
+	public Date get() {
 		Random rnd = new Random();
 
 		Calendar calendar = GregorianCalendar.getInstance();

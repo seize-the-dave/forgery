@@ -2,9 +2,12 @@ package uk.co.adaptivelogic.forgery;
 
 import com.google.common.base.Optional;
 
+import javax.inject.Provider;
 import java.lang.reflect.Type;
 
 public interface ForgerRegistry {
-    public <T> Optional<Forger<T>> lookup(Type type);
-    public <T> Optional<Forger<T>> lookup(Type type, String property);
+    public <T> void register(Provider<T> forger);
+    public <T> void register(Class<? extends Provider<T>> forgerClass);
+    public <T> Optional<Provider<T>> lookup(Type type);
+    public <T> Optional<Provider<T>> lookup(Type type, String property);
 }
