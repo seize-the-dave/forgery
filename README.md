@@ -105,7 +105,7 @@ public class NameProvider implements Provider<String> {
 
 ## Building with Forgery
 
-Forgery is available from [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22uk.co.adaptivelogic%22%20AND%20a%3A%22forgery%22):
+Forgery is available from [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22uk.co.adaptivelogic%22%20AND%20a%3A%22forgery%22).  Here's the dependency you'll need for Maven, but Forgery can also be used as a dependency in Ivy, Buildr and Gradle (Java), Grape (Groovy), SBT (Scala) and Leiningen (Clojure):
 
 ```xml
 <dependency>
