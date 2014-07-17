@@ -105,7 +105,7 @@ public class NameProvider implements Provider<String> {
 
 ## Building with Forgery
 
-Forgery is available from Maven Central:
+Forgery is available from [Maven Central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22uk.co.adaptivelogic%22%20AND%20a%3A%22forgery%22):
 
 ```xml
 <dependency>
