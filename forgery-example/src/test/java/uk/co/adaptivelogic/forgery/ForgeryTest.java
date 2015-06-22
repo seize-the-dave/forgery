@@ -23,6 +23,7 @@ public class ForgeryTest {
             assertThat(employee, is(notNullValue()));
             assertThat(employee.getFirstName(), is(notNullValue()));
             assertThat(employee.getLastName(), is(notNullValue()));
+            assertThat(employee.isActive(), is(true)); //active is a primitive boolean
         }
     }
 }

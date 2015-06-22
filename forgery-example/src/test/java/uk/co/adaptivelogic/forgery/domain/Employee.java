@@ -12,6 +12,7 @@ public class Employee {
 	private String lastName;
 	private Date dateOfBirth;
 	private String ssn;
+	private boolean active;
 
 	public String getSsn() {
 		return ssn;
@@ -45,12 +46,21 @@ public class Employee {
 		this.lastName = lastName;
 	}
 
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("firstName", firstName)
 				.add("lastName", lastName)
 				.add("dateOfBirth", dateOfBirth)
 				.add("ssn", ssn)
+				.add("active", active)
 				.toString();
 	}
 }
