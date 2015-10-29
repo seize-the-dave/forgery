@@ -4,7 +4,7 @@ Forgery is a simple Java library for filling graphs of POJOs with _realistic_ du
 
 ## Usage
 
-Forgery comes with a bunch of default `javax.inject.Provider`s to cover common business domain objects.  To create an instance of Forgery, just build like so:
+Forgery comes with a [bunch of default](src/main/resources/META-INF/services/javax.inject.Provider) `javax.inject.Provider`s to cover common business domain objects.  To create an instance of Forgery, just build like so:
 
 ```java
 Forgery forgery = new Forgery.Builder().build();
