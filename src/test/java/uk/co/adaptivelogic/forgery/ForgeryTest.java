@@ -99,7 +99,6 @@ public class ForgeryTest {
                 .withForger(new FirstNameStringForger())
                 .withForger(new LastNameStringForger())
                 .withForger(new Provider<List<Employee>>() {
-                    @Override
                     public List<Employee> get() {
                         return new ArrayList<Employee>();
                     }
@@ -116,7 +115,6 @@ public class ForgeryTest {
         // When
         List<Employee> employees = new Forgery.Builder()
                 .withForger(new Provider<List<Employee>>() {
-                    @Override
                     public List<Employee> get() {
                         return new ArrayList<Employee>();
                     }
@@ -169,12 +167,10 @@ public class ForgeryTest {
             // Do nothing
         }
         
-        @Override
         public <T> Optional<Provider<T>> lookup(Type type) {
             return Optional.absent();
         }
 
-        @Override
         public <T> Optional<Provider<T>> lookup(Type type, String property) {
             return Optional.absent();
         }

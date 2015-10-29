@@ -1,6 +1,8 @@
 package uk.co.adaptivelogic.forgery;
 
+import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.junit.Test;
+import uk.co.adaptivelogic.forgery.domain.CreditCard;
 import uk.co.adaptivelogic.forgery.domain.Employee;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -25,5 +27,15 @@ public class ForgeryTest {
             assertThat(employee.getLastName(), is(notNullValue()));
             assertThat(employee.isActive(), is(true)); //active is a primitive boolean
         }
+    }
+
+    @Test
+    public void shouldForgeCreditCardWithAPan() {
+        // When
+        CreditCard forgedCreditCard = new Forgery.Builder().build().forge(CreditCard.class);
+
+        // Then
+        assertThat(forgedCreditCard.getPan(), is(notNullValue()));
+        assertThat(LuhnCheckDigit.LUHN_CHECK_DIGIT.isValid(forgedCreditCard.getPan()), is(true));
     }
 }
