@@ -17,7 +17,6 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
     private Map<Key, Provider<?>> forgerMap = new HashMap<Key, Provider<?>>();
     private Map<Key, Class<? extends Provider<?>>> forgerClassMap = new HashMap<Key, Class<? extends Provider<?>>>();
     
-    @Override
     public void register(Provider<?> forger) {
         LOGGER.info("Registering " + forger.getClass());
         Type forgerType = getParameterType(forger);
@@ -70,7 +69,6 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
         }
     }
 
-    @Override
     public Optional<? extends Provider<?>> lookup(Type type) {
         LOGGER.info("Looking up Forger for " + type);
         Binding<?> binding = getInjector().getExistingBinding(Key.get(type));
@@ -83,7 +81,6 @@ public class GuiceForgerRegistry extends ForgerRegistrySupport implements Forger
         }
     }
 
-    @Override
     public Optional<? extends Provider<?>> lookup(Type type, String property) {
         LOGGER.info("Looking up Forger for " + type + " and property '" + property + "'");
         Binding<?> binding = getInjector().getExistingBinding(Key.get(type, Names.named(property)));

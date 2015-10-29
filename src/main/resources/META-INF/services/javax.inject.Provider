@@ -5,3 +5,4 @@ uk.co.adaptivelogic.forgery.forger.RandomIntegerForger
 uk.co.adaptivelogic.forgery.forger.RandomLongForger
 uk.co.adaptivelogic.forgery.forger.RandomNationalInsuranceNumberStringForger
 uk.co.adaptivelogic.forgery.forger.RandomSocialSecurityNumberStringForger
+uk.co.adaptivelogic.forgery.forger.RandomCreditCardForger
