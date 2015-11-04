@@ -1,6 +1,8 @@
 package uk.co.adaptivelogic.forgery.domain;
 
 import com.google.common.base.Objects;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import java.util.Date;
 
@@ -45,6 +47,7 @@ public class Employee {
 		this.lastName = lastName;
 	}
 
+	@Override
 	public String toString() {
 		return Objects.toStringHelper(this)
 				.add("firstName", firstName)
@@ -52,5 +55,15 @@ public class Employee {
 				.add("dateOfBirth", dateOfBirth)
 				.add("ssn", ssn)
 				.toString();
+	}
+
+	@Override
+	public boolean equals(Object that) {
+		return EqualsBuilder.reflectionEquals(this, that);
+	}
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
 	}
 }
