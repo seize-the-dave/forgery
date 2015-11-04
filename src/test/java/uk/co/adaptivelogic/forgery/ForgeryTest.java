@@ -1,20 +1,14 @@
 package uk.co.adaptivelogic.forgery;
 
 import com.google.common.base.Optional;
-import com.google.common.reflect.TypeToken;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.co.adaptivelogic.forgery.domain.Employee;
-import uk.co.adaptivelogic.forgery.domain.Manager;
 
 import javax.inject.Provider;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.rules.ExpectedException.none;
 
 /**
@@ -26,40 +20,6 @@ public class ForgeryTest {
     public ExpectedException expectedException = none();
 
     @Test
-    public void shouldCreateInstanceOfClass() {
-        // When
-        String string = new Forgery.Builder().build().forge(String.class);
-
-        // Then
-        assertThat(string, is(notNullValue()));
-    }
-
-    @Test
-    public void shouldCreateInstanceOfClassWithProperties() {
-        // When
-        Employee person = new Forgery.Builder().build().forge(Employee.class);
-
-        // Then
-        assertThat(person, is(notNullValue()));
-        assertThat(person.getFirstName(), is(notNullValue()));
-        assertThat(person.getLastName(), is(notNullValue()));
-    }
-
-    @Test
-    public void shouldUseForgerForForgingClass() {
-        Provider<String> forger = new Provider<String>() {
-            public String get() {
-                return "Example";
-            }
-        };
-        // When
-        String string = new Forgery.Builder().withForger(forger).build().forge(String.class);
-
-        // Then
-        assertThat(string, is("Example"));
-    }
-
-    @Test
     public void shouldThrowNullPointerWhenPassingNullObjectWithUsefulMessageForUser() {
         // Then
         expectedException.expect(NullPointerException.class);
@@ -68,74 +28,6 @@ public class ForgeryTest {
         // When
         Forgery forgery = new Forgery(new FakeForgerRegistry());
         forgery.forge(null);
-    }
-
-    @Test
-    public void shouldCreateInstanceOfClassUsingLoadedForger() {
-        // When
-        Long actual = new Forgery.Builder().build().forge(Long.class);
-
-        // Then
-        assertThat(actual, is(notNullValue()));
-    }
-
-    @Test
-    public void shouldFillPropertyWithRelevantData() {
-        // When
-        Employee employee = new Forgery.Builder()
-                .withForger(new FirstNameStringForger())
-                .withForger(new LastNameStringForger())
-                .build().forge(Employee.class);
-
-        // Then
-        assertThat(employee.getFirstName(), is("John"));
-        assertThat(employee.getLastName(), is("Smith"));
-    }
-
-    @Test
-    public void shouldCreateClassWithParameterizedProperty() {
-        // When
-        Manager manager = new Forgery.Builder()
-                .withForger(new FirstNameStringForger())
-                .withForger(new LastNameStringForger())
-                .withForger(new Provider<List<Employee>>() {
-                    public List<Employee> get() {
-                        return new ArrayList<Employee>();
-                    }
-                })
-                .build().forge(Manager.class);
-
-        // Then
-        assertThat(manager.getFirstName(), is("John"));
-        assertThat(manager.getLastName(), is("Smith"));
-    }
-
-    @Test
-    public void shouldCreateParameterizedType() {
-        // When
-        List<Employee> employees = new Forgery.Builder()
-                .withForger(new Provider<List<Employee>>() {
-                    public List<Employee> get() {
-                        return new ArrayList<Employee>();
-                    }
-                })
-                .build().forge(new TypeToken<List<Employee>>() {
-                }.getType());
-
-        // Then
-        assertThat(employees, is(notNullValue()));
-    }
-
-    @Test
-    public void shouldWorkMultipleTimes() {
-        System.out.println("Caching Test");
-        // When
-        Forgery forgery = new Forgery.Builder().build();
-
-        // Then
-        assertThat(forgery.forge(Employee.class), is(notNullValue()));
-        assertThat(forgery.forge(Employee.class), is(notNullValue()));
-        assertThat(forgery.forge(Employee.class), is(notNullValue()));
     }
 
     @Test

@@ -15,8 +15,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ServiceLoader;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -26,7 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p/>
  * <p>
  * If you need to auto create a class object then pass it to Forgery and let us provide a properly constructed
- * class for your use.  All you need to do is <pre>Forgery.get(ToForge.class)</pre>
+ * class for your use.  All you need to do is {@link #forge(Type)}
  * </p>
  */
 public class Forgery {
@@ -89,6 +87,10 @@ public class Forgery {
         }
     }
 
+    /**
+     * @deprecated Builder has been separated from Forgery to improve the api, please use {@link ForgeryBuilder} instead
+     */
+    @Deprecated
     public static class Builder {
         private ForgerRegistry registry = new GuiceForgerRegistry();
 
