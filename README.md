@@ -1,4 +1,4 @@
-# Forgery [![Build Status](https://travis-ci.org/adaptive-logic/forgery.svg?branch=master)](https://travis-ci.org/adaptive-logic/forgery)
+# Forgery [![Build Status](https://travis-ci.org/seize-the-dave/forgery.svg?branch=master)](https://travis-ci.org/adaptive-logic/forgery)
 
 Forgery is a simple Java library for filling graphs of POJOs with _realistic_ dummy data.  Forgery uses JSR 330 (`javax.inject`) behind the scenes to provide data, which makes it very simple to extend.
 
